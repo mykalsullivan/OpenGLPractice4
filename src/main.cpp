@@ -25,6 +25,9 @@ unsigned int uniformModel;
 bool direction = true;
 float triOffset = 0.0f, triMaxOffset = 1.0f, triTranslationIncrement = 0.015f;
 
+// Angle stuff
+float currentAngle = 0.0f;
+
 // Vertex shader
 static const char* vertexShader =
         "#version 330\n"
@@ -34,7 +37,7 @@ static const char* vertexShader =
         "\n"
         "void main()\n"
         "{\n"
-        "   gl_Position = model * vec4(0.5 * pos.x, 0.5 * pos.y, pos.z, 1.0);\n"    /* Note: 'gl_Position' is also built-in */
+        "   gl_Position = model * vec4(pos.x, pos.y, pos.z, 1.0);\n"    /* Note: 'gl_Position' is also built-in */
         "}\n";
 
 // Fragment shader
@@ -45,7 +48,7 @@ static const char* fragmentShader =
         "\n"
         "void main()\n"
         "{\n"
-        "   color = vec4(1.0, 1.0, 1.0, 0.5);\n"
+        "   color = vec4(1.0, 1.0, 1.0, 1.0);\n"
         "}\n";
 
 void createTriangle()
@@ -217,6 +220,10 @@ int main()
     // Main loop
     while (!glfwWindowShouldClose(mainWindow))
     {
+        // Set window size
+        glfwGetWindowSize(mainWindow, &bufferWidth, &bufferHeight);
+        glViewport(0, 0, bufferWidth, bufferHeight);
+
         // Get/handle user input
         glfwPollEvents();
 
@@ -233,6 +240,7 @@ int main()
             auto g = (float) std::abs(std::sin(i-(M_PI/3)));
             auto b = (float) std::abs(std::sin(i-(2*M_PI/3)));
 
+            glm::mat4 model(1.0f);
             if (direction)
             {
                 triOffset += triTranslationIncrement;
@@ -247,16 +255,20 @@ int main()
                 direction = !direction;
             }
 
+            if (currentAngle >= 360)
+            {
+                currentAngle -= 360;
+            }
+
             // Clear window
             glClearColor(r, g, b, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT);
 
             glUseProgram(shader);
 
-            glm::mat4 model(1.0f);
+            model = glm::rotate(model, currentAngle * (float) M_PI/180, glm::vec3(0.0f, 0.0f, 1.0f));
             model = glm::translate(model, glm::vec3(triOffset, triOffset, 0.0f));
-            model = glm::scale(model, glm::vec3(1.0f - i, 1.0f - i, 1.0f));
-            model = glm::rotate(model, (11 * i) * (45 * (float) M_PI/180), glm::vec3(0.0f, 0.0f, 1.0f));
+            model = glm::scale(model, glm::vec3(0.5f, 0.5f, 1.0f));
 
             glUniform1f((int) uniformModel, triOffset);
             glUniformMatrix4fv((int) uniformModel, 1, false, glm::value_ptr(model));
@@ -267,8 +279,9 @@ int main()
 
             glUseProgram(0);
 
-            std::this_thread::sleep_for(std::chrono::microseconds (16667));
+            std::this_thread::sleep_for(std::chrono::microseconds(16667));
             i += 0.005f;
+            currentAngle += 1.5f;
         }
 
         // Swap display buffers
