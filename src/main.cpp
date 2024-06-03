@@ -231,13 +231,13 @@ int main()
             static float i = 0;
 
 //            // Rotates between "hard" RGB values
-//            auto r = (float) std::sin(i);
-//            auto g = (float) std::sin(i+M_PI-(M_PI/3));
+//            auto r = (float) std::sin(i+(2*M_PI/3));
+//            auto g = (float) std::sin(i);
 //            auto b = (float) std::sin(i-(2*M_PI/3));
 
             // Rotates between RGB values, but with a LOT of color blending
-            auto r = (float) std::abs(std::sin(i));
-            auto g = (float) std::abs(std::sin(i+(2*M_PI/3)));
+            auto r = (float) std::abs(std::sin(i+(2*M_PI/3)));
+            auto g = (float) std::abs(std::sin(i));
             auto b = (float) std::abs(std::sin(i-(2*M_PI/3)));
 
             glm::mat4 model(1.0f);
